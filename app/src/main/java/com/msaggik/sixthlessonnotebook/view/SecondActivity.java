@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,12 +25,13 @@ public class SecondActivity extends AppCompatActivity {
 
     // создание полей
     private RecyclerView recyclerView; // поле для списка RecyclerView
-    private FloatingActionButton fabAdd; // поле для кнопки добавить новую заметку
+    private FloatingActionButton fabAdd, buttonDelete; // поле для кнопки добавить новую заметку
 
     private List<Notebook> notesList; // поле для контейнера списка заметок
 
     private DatabaseHelper database; // поле работы с БД
     private Adapter adapter; // поле для адаптера
+
 
 
     @Override
@@ -59,20 +61,30 @@ public class SecondActivity extends AppCompatActivity {
                 startActivity(new Intent(SecondActivity.this, AddNotesActivity.class));
             }
         });
+        buttonDelete = findViewById(R.id.buttonDelete);
+        buttonDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                database.deleteAllNotes();
+                notesList.clear();
+                recyclerView.setAdapter(adapter); // передача в recyclerView адаптер
+            }
+        });
     }
 
     // метод считывания из БД всех записей
-    public void fetchAllNotes(){
+    public void fetchAllNotes() {
         // чтение БД и запись данных в курсор
         Cursor cursor = database.readNotes();
 
         if (cursor.getCount() == 0) { // если данные отсутствую, то вывод на экран об этом тоста
             Toast.makeText(this, "Заметок нет", Toast.LENGTH_SHORT).show();
         } else { // иначе помещение их в контейнер данных notesList
-            while (cursor.moveToNext()){
+            while (cursor.moveToNext()) {
                 // помещение в контейнер notesList из курсора данных
                 notesList.add(new Notebook(cursor.getString(0), cursor.getString(1), cursor.getString(2)));
             }
         }
     }
+
 }
